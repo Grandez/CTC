@@ -82,9 +82,10 @@ You can zooming in to get detailed info
 ## Web page
 
 https://grandez.shinyapps.io/CTC1/
+
 It's only work on browser not in RStudio
 
 ```{r sc}
- knitr::include_app("https://grandez.shinyapps.io/CTC1/")
+ knitr::include_app("https://grandez.shinyapps.io/CTC1/", height="800px")
 ```
 
