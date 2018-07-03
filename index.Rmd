@@ -79,11 +79,11 @@ You can zooming in to get detailed info
    p
 ```
 
-## Web page
+## The Application
 
-https://grandez.shinyapps.io/CTC1/
+1.- Source code: https://github.com/Grandez/CTC
 
-It's only work on browser not in RStudio
+2.- Web Page: https://grandez.shinyapps.io/CTC1/ (It's only work on browser not in RStudio)
 
 ```{r sc}
  knitr::include_app("https://grandez.shinyapps.io/CTC1/", height="800px")
