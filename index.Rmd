@@ -1,0 +1,90 @@
+---
+title: "Cryptocurrencies"
+author: "Javier Gonzalez"
+date: "3 de julio de 2018"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r initialization, echo = FALSE, message=FALSE}
+require(plotly)
+require(dplyr)
+btc = read.csv("data/BTC.csv", dec=",", sep=";")
+btc$Fecha = as.Date(btc$Fecha, format="%d/%m/%Y")
+dfg <- btc[order(btc$Fecha),] 
+
+calculateSegment <- function(data, interval, selected) {
+    dateSelect = as.Date(selected, origin=lubridate::origin)
+    df <- data %>% filter(Fecha <= dateSelect , Fecha >= dateSelect - interval)
+    
+    model <- lm(End ~ Fecha, data=df)
+    
+    y1 <- model$coefficients[1] + model$coefficients[2] * as.numeric(df[1,"Fecha"])
+    y2 <- model$coefficients[1] + model$coefficients[2] * as.numeric(df[nrow(df),"Fecha"])
+    X <- c(df[1,"Fecha"], df[nrow(df),"Fecha"])
+    Y <- c(y1, y2)
+    
+    df <- as.data.frame(cbind(x=X, y=Y))
+    df$x = as.Date(df$x, origin=lubridate:::origin)
+
+    return(df)
+}
+
+```
+
+## R Markdown
+
+This is a little application to analyze cryptocurrencies evolution using quantitative analysis
+
+For this demo:
+
+- Sample data are stored in a csv file but the original idea use an external database with update prices
+- Only _Mobile Means_ for four intervals are implemented
+- Vertical Red line set the current date/cotization
+
+## Candlestick sample
+
+This is a sample of data using candlestick chart style.
+
+You can zooming in to get detailed info
+
+```{r plot1}
+ p <- plot_ly(dfg, x = ~Fecha, type = 'candlestick', open = ~Beg, close = ~End, high = ~High, low = ~Low)
+ p <- layout(p, xaxis = list(rangeslider = list(visible = F)))
+ p
+```
+
+## Median mobile sample
+
+- Orange line is the MM for 1 week
+- Green line is the MM for 1 month
+
+```{r lineal, echo = FALSE}
+    f <- "2018-01-05"
+    df <- dfg %>% filter(Fecha >= "2017-10-01" , Fecha <= "2018-03-01")
+    p <- plot_ly(df, x = ~Fecha, y = ~End, type = 'scatter', mode = 'markers + lines')
+    p <- layout(p, shapes=list(type="line", fillcolor="red",line=list(color="red")
+                                          ,opacity=1
+                                          ,x0=f, x1="2018-01-05", xref="x"
+                                          ,y0=0, y1=1, yref="paper")
+         )
+    segment <- calculateSegment(df, 7, f)
+    p <- add_trace(p, x=~x, y=~y, data=segment, mode="lines", showlegend = F)
+    segment <- calculateSegment(df, 30, f)
+    p <- add_trace(p, x=~x, y=~y, data=segment, mode="lines", showlegend = F)
+
+   p
+```
+
+## Web page
+
+https://grandez.shinyapps.io/CTC1/
+It's only work on browser not in RStudio
+
+```{r sc}
+ knitr::include_app("https://grandez.shinyapps.io/CTC1/")
+```
+
